@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Diary</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h2 id="title"></h2>
+
+    <div id="login-section">
+      <input type="text" id="login-username" placeholder="Username"><br>
+      <input type="password" id="login-password" placeholder="Password"><br>
+      <button id="login-btn">Login</button>
+      <p>No account? <a id="show-register" href="#">Register</a></p>
+    </div>
+
+    <div id="register-section" style="display:none;">
+      <input type="text" id="register-username" placeholder="New Username"><br>
+      <input type="email" id="register-email" placeholder="Email"><br>
+      <input type="password" id="register-password" placeholder="New Password"><br>
+      <button id="register-btn">Register</button>
+      <p>Have an account? <a id="show-login" href="#">Login</a></p>
+    </div>
+
+    <div id="diary-section" style="display:none;">
+      <h3>My Diary Dashboard</h3>
+      <textarea id="diary-text" placeholder="Write your entry..."></textarea><br>
+      <button id="save-entry-btn">Save Entry</button>
+      <button id="logout-btn">Logout</button>
+
+      <h4>Your Entries</h4>
+      <div id="entries"></div>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

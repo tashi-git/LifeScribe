@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Diary Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">My Journal</h1>
+      <div class="user-profile">
+        <button class="profile-btn" onclick="toggleDropdown()">
+          <span class="profile-icon">👤</span>
+          Profile
+        </button>
+        <div id="profile-dropdown" class="dropdown-content">
+          <p><strong>Username:</strong> {{ username }}</p>
+          <p><strong>Email:</strong> {{ email }}</p>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="dashboard">
+      <h2>Whispers of Your Heart</h2>
+      <div class="entry-form">
+        <form id="entryForm">
+          <input type="date" id="entry_date" required style="width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; font-family: 'Poppins', sans-serif; transition: all 0.3s ease;">
+          <textarea id="content" placeholder="Write your thoughts here..." required></textarea>
+          <button type="submit" class="save-btn">Save Entry</button>
+        </form>
+      </div>
+
+      <div class="entries-section">
+        <h3>Your Entries</h3>
+        <div id="entries" class="entries-list">
+          <!-- Entries will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = '{{ session.token }}' || localStorage.getItem('token');
+
+    async function loadEntries() {
+      if (!token) {
+        alert('Please log in via API first.');
+        return;
+      }
+      const res = await fetch('/api/entries', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const entries = await res.json();
+      const entriesDiv = document.getElementById('entries');
+      entriesDiv.innerHTML = '';
+      if (entries.length === 0) {
+        entriesDiv.innerHTML = '<p class="no-entries">No entries yet. Start writing!</p>';
+      } else {
+        entries.forEach(e => {
+          const div = document.createElement('div');
+          div.className = 'entry';
+          div.innerHTML = `
+            <div class="entry-content">
+              <p>${e.content}</p>
+            </div>
+            <div class="entry-meta">
+              <small>Entry Date: ${new Date(e.entry_date).toLocaleDateString()}</small><br>
+              <small>Created: ${new Date(e.created_at).toLocaleString()}</small>
+            </div>
+          `;
+          entriesDiv.appendChild(div);
+        });
+      }
+    }
+
+    document.getElementById('entryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!token) {
+        alert('Please log in via API first.');
+        return;
+      }
+      const content = document.getElementById('content').value;
+      const res = await fetch('/api/entry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content })
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        loadEntries();
+        document.getElementById('entryForm').reset();
+      } else {
+        alert('Error saving entry');
+      }
+    });
+
+    function toggleDropdown() {
+      const dropdown = document.getElementById('profile-dropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/logout';
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+      if (!event.target.matches('.profile-btn')) {
+        const dropdowns = document.getElementsByClassName('dropdown-content');
+        for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+
+    loadEntries();
+  </script>
+</body>
+</html>
