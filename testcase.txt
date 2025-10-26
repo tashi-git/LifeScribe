@@ -1,0 +1,150 @@
+# Test Cases for Diary App - GitHub CI
+
+## Overview
+This document outlines test cases for the Flask-based diary application. The app includes user authentication (registration and login) and diary entry management (adding and retrieving entries) via both API endpoints and web routes. These test cases are designed to ensure functionality, error handling, and security for CI/CD pipelines.
+
+## Test Environment Setup
+- Flask app running on localhost:5000 (default debug mode)
+- MySQL database configured as per db_config.py
+- Test user data: username='testuser', email='test@example.com', password='testpass123'
+- JWT tokens for API authentication
+
+## Test Cases
+
+### 1. User Registration - API
+**Test Case ID:** TC_REG_API_001  
+**Description:** Successful user registration via API  
+**Preconditions:** No existing user with username 'testuser' or email 'test@example.com'  
+**Steps:**  
+1. Send POST request to /api/register with JSON: {"username": "testuser", "email": "test@example.com", "password": "testpass123"}  
+**Expected Result:** Status 200, JSON response: {"status": "success"}  
+**Post-conditions:** User created in database
+
+### 2. User Registration - API (Duplicate Username)
+**Test Case ID:** TC_REG_API_002  
+**Description:** Registration failure due to duplicate username  
+**Preconditions:** User 'testuser' already exists  
+**Steps:**  
+1. Send POST request to /api/register with JSON: {"username": "testuser", "email": "new@example.com", "password": "testpass123"}  
+**Expected Result:** Status 200, JSON response: {"status": "error", "message": "Username or email already exists!"}  
+
+### 3. User Registration - Web Route
+**Test Case ID:** TC_REG_WEB_001  
+**Description:** Successful user registration via web form  
+**Preconditions:** No existing user with username 'testuser2'  
+**Steps:**  
+1. Navigate to /register  
+2. Fill form: username='testuser2', email='test2@example.com', password='testpass123'  
+3. Submit form  
+**Expected Result:** Redirect to /login, user created in database  
+
+### 4. User Login - API
+**Test Case ID:** TC_LOGIN_API_001  
+**Description:** Successful login via API  
+**Preconditions:** User 'testuser' exists with correct password  
+**Steps:**  
+1. Send POST request to /api/login with JSON: {"username": "testuser", "password": "testpass123"}  
+**Expected Result:** Status 200, JSON response with "status": "success", "token": "<JWT>", "user_id": <id>  
+
+### 5. User Login - API (Invalid Credentials)
+**Test Case ID:** TC_LOGIN_API_002  
+**Description:** Login failure with invalid credentials  
+**Preconditions:** User 'testuser' exists  
+**Steps:**  
+1. Send POST request to /api/login with JSON: {"username": "testuser", "password": "wrongpass"}  
+**Expected Result:** Status 200, JSON response: {"status": "error", "message": "Invalid credentials!"}  
+
+### 6. User Login - Web Route
+**Test Case ID:** TC_LOGIN_WEB_001  
+**Description:** Successful login via web form  
+**Preconditions:** User 'testuser' exists  
+**Steps:**  
+1. Navigate to /login  
+2. Fill form: username='testuser', password='testpass123'  
+3. Submit form  
+**Expected Result:** Redirect to /diary, session contains user_id and token  
+
+### 7. Add Diary Entry - API
+**Test Case ID:** TC_ENTRY_API_001  
+**Description:** Add new diary entry via API  
+**Preconditions:** User logged in, valid JWT token  
+**Steps:**  
+1. Send POST request to /api/entry with Authorization header: Bearer <token>  
+2. JSON payload: {"content": "This is a test diary entry"}  
+**Expected Result:** Status 200, JSON response: {"status": "success"}, entry created with today's date  
+
+### 8. Add Diary Entry - API (Unauthorized)
+**Test Case ID:** TC_ENTRY_API_002  
+**Description:** Add entry without valid token  
+**Preconditions:** No token provided  
+**Steps:**  
+1. Send POST request to /api/entry without Authorization header  
+**Expected Result:** Status 401, JSON response: {"message": "Token is missing!"}  
+
+### 9. Add Diary Entry - Web Route
+**Test Case ID:** TC_ENTRY_WEB_001  
+**Description:** Add entry via web form  
+**Preconditions:** User logged in via session  
+**Steps:**  
+1. Navigate to /diary (user logged in)  
+2. Fill form: content='Web test entry', entry_date='2023-10-01'  
+3. Submit form  
+**Expected Result:** Redirect to /diary, entry added to database  
+
+### 10. Get Diary Entries - API
+**Test Case ID:** TC_GET_ENTRIES_API_001  
+**Description:** Retrieve user's diary entries via API  
+**Preconditions:** User has entries, valid JWT token  
+**Steps:**  
+1. Send GET request to /api/entries with Authorization header: Bearer <token>  
+**Expected Result:** Status 200, JSON array of entries ordered by created_at DESC  
+
+### 11. Get Diary Entries - API (Unauthorized)
+**Test Case ID:** TC_GET_ENTRIES_API_002  
+**Description:** Retrieve entries without token  
+**Preconditions:** No token  
+**Steps:**  
+1. Send GET request to /api/entries without Authorization header  
+**Expected Result:** Status 401, JSON response: {"message": "Token is missing!"}  
+
+### 12. Logout - Web Route
+**Test Case ID:** TC_LOGOUT_WEB_001  
+**Description:** User logout  
+**Preconditions:** User logged in via session  
+**Steps:**  
+1. Navigate to /logout  
+**Expected Result:** Redirect to /login, session cleared (user_id and token removed)  
+
+### 13. Access Protected Route Without Login
+**Test Case ID:** TC_PROTECTED_001  
+**Description:** Attempt to access /diary without login  
+**Preconditions:** No session  
+**Steps:**  
+1. Navigate to /diary  
+**Expected Result:** Redirect to /login  
+
+### 14. Index Route Redirection
+**Test Case ID:** TC_INDEX_001  
+**Description:** Index route behavior  
+**Preconditions:** User not logged in  
+**Steps:**  
+1. Navigate to /  
+**Expected Result:** Redirect to /login  
+**Alternative:** If logged in, redirect to /diary  
+
+### 15. JWT Token Expiration
+**Test Case ID:** TC_JWT_EXPIRY_001  
+**Description:** API request with expired JWT  
+**Preconditions:** Obtain token, wait >24 hours or manipulate expiry  
+**Steps:**  
+1. Send request to protected API endpoint with expired token  
+**Expected Result:** Status 401, JSON response: {"message": "Token is invalid!"}  
+
+## Notes for CI Implementation
+- Use tools like pytest or unittest for automated testing
+- Mock database connections for unit tests
+- Use Flask test client for route testing
+- Include database setup/teardown in test fixtures
+- Test both success and failure scenarios
+- Validate JSON responses and HTTP status codes
+- Check database state after operations
