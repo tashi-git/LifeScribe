@@ -45,7 +45,21 @@ jobs:
 
     - name: Create test database tables
       run: |
-        mysql -h127.0.0.1 -P3306 -utestuser -ptestpass test_diary_app < schema.sql
+        mysql -h127.0.0.1 -P3306 -utestuser -ptestpass test_diary_app -e "
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(50) UNIQUE NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS entries (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            content TEXT NOT NULL,
+            entry_date DATE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );"
       continue-on-error: true
 
     - name: Run tests
