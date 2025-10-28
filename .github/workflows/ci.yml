@@ -1,3 +1,85 @@
+# name: CI
+
+# on:
+#   push:
+#     branches: [ main, master ]
+#   pull_request:
+#     branches: [ main, master ]
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+
+#     services:
+#       mysql:
+#         image: mysql:8.0
+#         env:
+#           MYSQL_ROOT_PASSWORD: rootpassword
+#           MYSQL_DATABASE: test_diary_app
+#           MYSQL_USER: testuser
+#           MYSQL_PASSWORD: testpass
+#         ports:
+#           - 3306:3306
+#         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+#     steps:
+#     - uses: actions/checkout@v4
+
+#     - name: Set up Python
+#       uses: actions/setup-python@v4
+#       with:
+#         python-version: '3.9'
+
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#         pip install pytest pytest-cov
+
+#     - name: Wait for MySQL to be ready
+#       run: |
+#         while ! mysqladmin ping -h"127.0.0.1" -P"3306" --silent; do
+#           echo "Waiting for MySQL..."
+#           sleep 2
+#         done
+
+#     - name: Create test database tables
+#       run: |
+#         mysql -h127.0.0.1 -P3306 -utestuser -ptestpass test_diary_app -e "
+#         CREATE TABLE IF NOT EXISTS users (
+#             id INT AUTO_INCREMENT PRIMARY KEY,
+#             username VARCHAR(50) UNIQUE NOT NULL,
+#             email VARCHAR(100) UNIQUE NOT NULL,
+#             password_hash VARCHAR(255) NOT NULL
+#         );
+#         CREATE TABLE IF NOT EXISTS entries (
+#             id INT AUTO_INCREMENT PRIMARY KEY,
+#             user_id INT NOT NULL,
+#             content TEXT NOT NULL,
+#             entry_date DATE NOT NULL,
+#             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+#         );"
+#       continue-on-error: true
+
+#     - name: Run tests
+#       env:
+#         DB_HOST: 127.0.0.1
+#         DB_USER: testuser
+#         DB_PASSWORD: testpass
+#         DB_NAME: test_diary_app
+#       run: |
+#         python -m pytest test_app.py -v --tb=short --cov=app --cov-report=xml
+        
+
+#     - name: Upload coverage to Codecov
+#       uses: codecov/codecov-action@v3
+#       with:
+#         file: ./coverage.xml
+#         flags: unittests
+#         name: codecov-umbrella
+#         fail_ci_if_error: false
+
 name: CI
 
 on:
@@ -10,67 +92,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: test_diary_app
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpass
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
 
-    - name: Install dependencies
+    - name: Build and run Docker Compose
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov
-
-    - name: Wait for MySQL to be ready
-      run: |
-        while ! mysqladmin ping -h"127.0.0.1" -P"3306" --silent; do
-          echo "Waiting for MySQL..."
-          sleep 2
-        done
-
-    - name: Create test database tables
-      run: |
-        mysql -h127.0.0.1 -P3306 -utestuser -ptestpass test_diary_app -e "
-        CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(50) UNIQUE NOT NULL,
-            email VARCHAR(100) UNIQUE NOT NULL,
-            password_hash VARCHAR(255) NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS entries (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id INT NOT NULL,
-            content TEXT NOT NULL,
-            entry_date DATE NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        );"
-      continue-on-error: true
-
-    - name: Run tests
-      env:
-        DB_HOST: 127.0.0.1
-        DB_USER: testuser
-        DB_PASSWORD: testpass
-        DB_NAME: test_diary_app
-      run: |
-        python -m pytest test_app.py -v --tb=short --cov=app --cov-report=xml
-        
+        docker-compose up --build --exit-code-from app
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

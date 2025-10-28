@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: test_diary_app
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    environment:
+      DB_HOST: mysql
+      DB_USER: testuser
+      DB_PASSWORD: testpass
+      DB_NAME: test_diary_app
+    depends_on:
+      - mysql
+    command: pytest test_app.py -v --tb=short --cov=app --cov-report=term-missing
+
+volumes:
+  mysql_data:
