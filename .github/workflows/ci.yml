@@ -49,6 +49,11 @@ jobs:
       continue-on-error: true
 
     - name: Run tests
+      env:
+        DB_HOST: 127.0.0.1
+        DB_USER: testuser
+        DB_PASSWORD: testpass
+        DB_NAME: test_diary_app
       run: |
         python -m pytest test_app.py -v --tb=short --cov=app --cov-report=xml
         

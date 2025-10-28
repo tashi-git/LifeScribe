@@ -6,6 +6,7 @@ from db_config import db_config
 import datetime
 import jwt
 from functools import wraps
+import os
 
 app = Flask(__name__)
 app.secret_key = 'my_secre_key_12345'  # Change this to a secure secret key
@@ -20,7 +21,14 @@ def index():
 
 
 def get_db_connection():
-    return mysql.connector.connect(**db_config)
+    # Use environment variables if available, otherwise fall back to db_config
+    db_config_dynamic = {
+        'host': os.getenv('DB_HOST', db_config.get('host')),
+        'user': os.getenv('DB_USER', db_config.get('user')),
+        'password': os.getenv('DB_PASSWORD', db_config.get('password')),
+        'database': os.getenv('DB_NAME', db_config.get('database'))
+    }
+    return mysql.connector.connect(**db_config_dynamic)
 
 
 # -------- API REGISTER --------
