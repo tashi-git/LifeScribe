@@ -12,7 +12,6 @@ services:
       - mysql_data:/var/lib/mysql
       - ./db-init:/docker-entrypoint-initdb.d
 
-
   app:
     build: .
     environment:
@@ -22,7 +21,7 @@ services:
       DB_NAME: test_diary_app
     depends_on:
       - mysql
-    command: pytest test_app.py -v --tb=short --cov=app --cov-report=term-missing
+    command: ["./wait-for-mysql.sh", "pytest", "test_app.py", "-v", "--tb=short", "--cov=app", "--cov-report=term-missing"]
 
 volumes:
   mysql_data:

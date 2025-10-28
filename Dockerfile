@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y \
 # Copy dependency file
 COPY requirements.txt .
 
+# Make the wait-for-mysql.sh script executable
+RUN chmod +x wait-for-mysql.sh
+
 # Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
