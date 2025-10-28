@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies for MySQL client
 RUN apt-get update && apt-get install -y \
-    default-libmysqlclient-dev gcc mysql-client \
+    default-libmysqlclient-dev gcc mariadb-client \
     default-libmysqlclient-dev gcc \
     && rm -rf /var/lib/apt/lists/*
 
