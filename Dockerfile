@@ -32,4 +32,4 @@ ENV DB_PASSWORD=testpass
 ENV DB_NAME=test_diary_app
 
 # Default command to run tests
-CMD ["pytest", "-v", "--tb=short", "--cov=app", "--cov-report=term-missing"]
+CMD ["./wait-for-mysql.sh", "pytest", "-v", "--tb=short", "--cov=app", "--cov-report=term-missing"]
