@@ -24,12 +24,13 @@ import datetime
 
 @pytest.fixture
 def client():
+    
     """
     Pytest fixture to create a Flask test client.
-
     This fixture configures the app for testing mode and provides a test client
     that can be used to simulate HTTP requests to the application endpoints.
     """
+
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client

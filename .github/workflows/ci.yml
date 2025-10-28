@@ -51,6 +51,7 @@ jobs:
     - name: Run tests
       run: |
         python -m pytest test_app.py -v --tb=short --cov=app --cov-report=xml
+        
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
