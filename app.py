@@ -21,20 +21,14 @@ def index():
 
 
 def get_db_connection():
-    try:
-        connection = mysql.connector.connect(
-            host=os.getenv("DB_HOST", "mysql"),
-            user=os.getenv("DB_USER", "testuser"),
-            password=os.getenv("DB_PASSWORD", "testpass"),
-            database=os.getenv("DB_NAME", "test_diary_app"),
-            port=int(os.getenv("DB_PORT", 3306))  # optional
-        )
-        if connection.is_connected():
-            print("✅ Successfully connected to MySQL Database")
-            return connection
-    except Error as e:
-        print(f"❌ Error while connecting to MySQL: {e}")
-        raise
+    # Use environment variables if available, otherwise fall back to db_config
+    db_config_dynamic = {
+        'host': os.getenv('DB_HOST', db_config.get('host')),
+        'user': os.getenv('DB_USER', db_config.get('user')),
+        'password': os.getenv('DB_PASSWORD', db_config.get('password')),
+        'database': os.getenv('DB_NAME', db_config.get('database'))
+    }
+    return mysql.connector.connect(**db_config_dynamic)
 
 
 # -------- API REGISTER --------
