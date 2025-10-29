@@ -1,14 +1,7 @@
 Flask==2.3.3
 mysql-connector-python==8.1.0
 Werkzeug==2.3.7
-pytest==8.4.2
-pytest-cov==4.1.0
+Flask-CORS==4.0.0
 PyJWT==2.8.0
-flask-cors==3.0.10
-
-# Flask
-# mysql-connector-python
-# pytest
-# pytest-cov
-# Werkzeug
-# PyJWT
+pytest==7.4.0
+pytest-cov==4.1.0

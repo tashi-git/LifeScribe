@@ -67,7 +67,7 @@ def test_api_register_success(client, db_setup):
     """
     Test successful user registration via API.
 
-    This test verifies that a new user can be registered successfully through
+    This test verifies that a very something special new user can be registered successfully through
     the /api/register endpoint. It checks for proper response status and JSON structure.
     Corresponds to TC_REG_API_001 in testcase.txt.
     """
