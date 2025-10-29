@@ -8,22 +8,26 @@ services:
       MYSQL_DATABASE: test_diary_app
       MYSQL_USER: testuser
       MYSQL_PASSWORD: testpass
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -ptestpass || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "3306:3306"
 
   app:
     build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
     environment:
       DB_HOST: mysql
       DB_USER: testuser
       DB_PASSWORD: testpass
       DB_NAME: test_diary_app
-    depends_on:
-      - mysql
-    command: ["./wait-for-mysql.sh", "pytest", "test_app.py", "-v", "--tb=short", "--cov=app", "--cov-report=term-missing"]
+    command: ["./wait-for-mysql.sh", "pytest", "test_app.py", "-v", "--tb=short", "--cov=app", "--cov-report=xml"]
 
 volumes:
   mysql_data:
