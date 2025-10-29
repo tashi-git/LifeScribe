@@ -193,7 +193,7 @@ def test_api_add_entry_success(client, db_setup):
 
 def test_api_add_entry_unauthorized(client, db_setup):
     """
-    Test adding entry without valid token.
+    Test adding entry without valid token .
 
     This test ensures that attempting to add a diary entry without
     proper authentication returns an unauthorized error.
