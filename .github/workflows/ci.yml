@@ -50,11 +50,18 @@ jobs:
         DB_PASSWORD: testpass
         DB_NAME: diary_db
 
-    - name: Log in to GitHub Container Registry
-      run: |
-        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+  build:
+    runs-on: ubuntu-latest
+    needs: test
 
-    - name: Build and push Docker image
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Docker Compose
       run: |
-        docker build -t ghcr.io/${{ github.repository }}/diary-app:latest .
-        docker push ghcr.io/${{ github.repository }}/diary-app:latest
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+
+    - name: Build Docker image
+      run: |
+        docker-compose build
