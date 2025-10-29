@@ -82,7 +82,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker-compose build
+        docker build -t diary_app:latest
         
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
