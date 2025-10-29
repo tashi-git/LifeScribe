@@ -49,3 +49,7 @@ jobs:
         DB_USER: testuser
         DB_PASSWORD: testpass
         DB_NAME: diary_db
+
+    - name: Build Docker image
+      run: |
+        docker-compose build
