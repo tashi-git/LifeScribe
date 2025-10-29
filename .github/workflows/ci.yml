@@ -19,10 +19,10 @@ jobs:
           MYSQL_USER: testuser
           MYSQL_PASSWORD: testpass
         options: >-
-          --health-cmd "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-          --health-interval 5s
-          --health-timeout 10s
-          --health-retries 20
+          --health-cmd mysqladmin ping
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 3306:3306
 
@@ -42,25 +42,29 @@ jobs:
     - name: Wait for MySQL
       run: |
         for i in {1..30}; do
-          if mysqladmin ping -h mysql -u root -prootpassword --silent; then
+          if mysqladmin ping -h localhost --silent; then
             echo "MySQL is ready"
             break
           fi
           echo "Waiting for MySQL... ($i/30)"
-          sleep 2
+          sleep 5
         done
         if [ $i -eq 30 ]; then
           echo "MySQL failed to start"
           exit 1
         fi
+      env:
+        MYSQL_PWD: rootpassword
 
     - name: Initialize database
       run: |
-        mysql -h mysql -u root -prootpassword test_diary_app < db-init/init.sql
+        mysql -h localhost -u root test_diary_app < db-init/init.sql
+      env:
+        MYSQL_PWD: rootpassword
 
     - name: Run tests
-      env:                             
-        DB_HOST: mysql
+      env:
+        DB_HOST: localhost
         DB_USER: testuser
         DB_PASSWORD: testpass
         DB_NAME: test_diary_app
