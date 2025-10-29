@@ -1,6 +1,5 @@
-CREATE DATABASE IF NOT EXISTS diary_db;
-
-USE diary_db;
+CREATE DATABASE IF NOT EXISTS test_diary_app;
+USE test_diary_app;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,

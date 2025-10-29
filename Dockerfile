@@ -1,36 +1,33 @@
-# Use a lightweight Python image based on Debian
+# Use a lightweight Python image
 FROM python:3.9-slim
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Prevent Python from writing .pyc files and use unbuffered stdout
+# Environment settings
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies for MySQL client
+# Install system dependencies for MySQL
 RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev gcc mariadb-client \
-    default-libmysqlclient-dev gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency file
+# Copy dependency file and install
 COPY requirements.txt .
-
-# Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy the entire application (app + tests)
+# Copy the entire application
 COPY . .
 
-# Make the wait-for-mysql.sh script executable
+# Make wait script executable
 RUN chmod +x wait-for-mysql.sh
 
-# Environment variables for MySQL connection
-ENV DB_HOST=mysql
-ENV DB_USER=testuser
-ENV DB_PASSWORD=testpass
-ENV DB_NAME=test_diary_app
+# Environment variables (defaults, can be overridden)
+ENV DB_HOST=mysql \
+    DB_USER=testuser \
+    DB_PASSWORD=testpass \
+    DB_NAME=test_diary_app
 
-# Default command to run tests
-CMD ["./wait-for-mysql.sh", "pytest", "-v", "--tb=short", "--cov=app", "--cov-report=term-missing"]
+# Default test command
+CMD ["./wait-for-mysql.sh", "pytest", "test_app.py", "-v", "--tb=short", "--cov=app", "--cov-report=term-missing"]
