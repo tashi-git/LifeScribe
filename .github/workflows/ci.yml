@@ -19,7 +19,7 @@ jobs:
           MYSQL_USER: testuser
           MYSQL_PASSWORD: testpass
         options: >-
-          --health-cmd "mysqladmin ping -u root -prootpassword --silent"
+          --health-cmd "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
           --health-interval 5s
           --health-timeout 10s
           --health-retries 20
@@ -41,11 +41,18 @@ jobs:
 
     - name: Wait for MySQL
       run: |
-        while ! mysqladmin ping -h mysql -u root -prootpassword --silent; do
-          echo "Waiting for MySQL..."
+        for i in {1..30}; do
+          if mysqladmin ping -h mysql -u root -prootpassword --silent; then
+            echo "MySQL is ready"
+            break
+          fi
+          echo "Waiting for MySQL... ($i/30)"
           sleep 2
         done
-        echo "MySQL is ready"
+        if [ $i -eq 30 ]; then
+          echo "MySQL failed to start"
+          exit 1
+        fi
 
     - name: Initialize database
       run: |
